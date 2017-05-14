@@ -1,0 +1,22 @@
+Test 1: Le fichier de réponse existe
+  Sous-test 1.1
+    Le fichier </home/jcdubacq/Documents/enseignement/m1101/shell/exo00/reponse.sh> existe-t-il ?
+    Oui! 1/1
+J'execute reponse.sh 
+  Sous-test 1.2
+    L'exécution a-t-elle été sans aucune génération d'erreur ?
+    Oui! 2/2
+Test 2: Vérification du fichier NOM.txt
+  Sous-test 2.1
+    Le fichier <NOM.txt> existe-t-il ?
+    Non! 2/3
+  Sous-test 2.2
+    La chaîne <Bonjour.> est-elle égale à <Bonjour.> ?
+    Oui! 3/4
+Test 3: Vérification de la sortie
+  Sous-test 3.1
+    La chaîne <Bonjour.> est-elle égale à <Bonjour.> ?
+    Oui! 4/5
+  Sous-test 3.2
+    Le fichier <STDOUT.txt> correspond-il bien au contenu <8bf282d28077db1c697afb13f25a7109> ?
+    Oui! 5/6
