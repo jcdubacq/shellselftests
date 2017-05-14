@@ -141,5 +141,29 @@ if [ "$1" = "test" ]; then
 fi
 
 if [ "$1" = "commit" ]; then
-    echo "pas encore fait"
+    DATE=$(date -u +%s)
+    setup
+    if [ ! -f ../exo00/NOM.txt ]; then
+        echo "Vous devez créer le fichier $(dirname "$HDIR")/exo00/NOM.txt avec votre nom dedans"
+        exit 0
+    fi
+    SIGN=$(md5sum < ../exo00/NOM.txt|cut -c1-32)
+    if [ -d ~jean-christophe.dubacq/selftests/ ]; then
+        DEST="~jean-christophe.dubacq/selftests"
+    else
+        DEST=/tmp/rendu
+        mkdir -p $DEST
+    fi
+    cp ../exo00/NOM.txt ${DEST}/$SIGN.NOM.txt
+    if [ -f reponse.sh ]; then
+        cp reponse.sh ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.reponse.sh
+    else
+        touch ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.reponse.sh
+    fi
+    rm -f JOURNAL.txt
+    initialcheck
+    finaltests
+    cp JOURNAL.txt ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.journal.txt
+    echo "$ALLTESTS/$NUMTESTS" > ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.mark.txt
+    die
 fi
