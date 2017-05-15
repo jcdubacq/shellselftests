@@ -16,6 +16,10 @@ setup () {
     true
 }
 
+setupfinal () {
+    setup
+}
+
 normaltests () {
     runandcapture
     nostderr
@@ -33,6 +37,10 @@ finaltests () {
 
 cleanup () {
     true
+}
+
+cleanupfinal () {
+    cleanup
 }
 
 finaltests () {

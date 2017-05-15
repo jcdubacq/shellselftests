@@ -3,7 +3,14 @@ cd "$HDIR"
 HDIR=$(pwd)
 stylebold=$(tput bold)
 stylenormal=$(tput sgr0)
-setup
+
+oui () {
+    echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt    
+}
+
+non () {
+    echo "XX  Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+}
 
 initialcheck () {
     thistest "Le fichier de réponse existe"
@@ -14,9 +21,9 @@ initialcheck () {
     echo "    Le fichier <$(pwd)/reponse.sh> existe-t-il ?" >> JOURNAL.txt
     if [ -f "reponse.sh" ]; then
         ALLTESTS=$((ALLTESTS+1))
-        echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        oui
     else
-        echo "    Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        non
     fi
 }
 
@@ -52,9 +59,9 @@ stringequal () {
     echo "    La chaîne <$1> est-elle égale à <$2> ?" >> JOURNAL.txt
     if [ "$1" = "$2" ]; then
         ALLTESTS=$((ALLTESTS+1))
-        echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        oui
     else
-        echo "    Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        non
     fi
 }
 
@@ -65,13 +72,27 @@ fileexists () {
     echo "    Le fichier <$1> existe-t-il ?" >> JOURNAL.txt
     if [ -f "$1" ]; then
         ALLTESTS=$((ALLTESTS+1))
-        echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        oui
     else
-        echo "    Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        non
+    fi
+}
+
+filenotexists () {
+    SUBTEST=$((SUBTEST+1))
+    NUMTESTS=$((NUMTESTS+1))
+    echo "  Sous-test $MAINTEST.$SUBTEST" >> JOURNAL.txt
+    echo "    Le fichier <$1> n'existe-t-il bien pas ?" >> JOURNAL.txt
+    if [ ! -f "$1" ]; then
+        ALLTESTS=$((ALLTESTS+1))
+        oui
+    else
+        non
     fi
 }
 
 filecheck () {
+    fileexists "$2"
     SUBTEST=$((SUBTEST+1))
     NUMTESTS=$((NUMTESTS+1))
     echo "  Sous-test $MAINTEST.$SUBTEST" >> JOURNAL.txt
@@ -79,9 +100,9 @@ filecheck () {
     SUM=$(md5sum < $2|cut -c1-32)
     if [ "$1" = "$SUM" ]; then
         ALLTESTS=$((ALLTESTS+1))
-        echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        oui
     else
-        echo "    Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        non
     fi
 }
 
@@ -94,9 +115,9 @@ nostderr () {
     SUM=$(md5sum < STDERR.txt|cut -c1-32)
     if [ "d41d8cd98f00b204e9800998ecf8427e" = "$SUM" ]; then
         ALLTESTS=$((ALLTESTS+1))
-        echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        oui
     else
-        echo "    Non! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt
+        non
     fi
 }
 
@@ -122,9 +143,10 @@ if [ -z "$1" ]; then
     echo "---------- ${stylebold}$(basename "$(pwd)")${stylenormal} ---------------------------"
     intro|fmt -s
     echo "--------------------------------------------"
-    setup
     echo "${stylebold}Aucun test effectué.${stylenormal}"
     echo "--------------------------------------------"
+    cleanupfinal
+    setup
     exit 0
 fi
 
@@ -133,8 +155,9 @@ ALLTESTS=0
 NUMTESTS=0
 
 if [ "$1" = "test" ]; then
-    setup
     rm -f JOURNAL.txt
+    cleanupfinal
+    setup
     initialcheck
     normaltests
     die
@@ -142,7 +165,8 @@ fi
 
 if [ "$1" = "commit" ]; then
     DATE=$(date -u +%s)
-    setup
+    cleanupfinal
+    setupfinal
     if [ ! -f ../exo00/NOM.txt ]; then
         echo "Vous devez créer le fichier $(dirname "$HDIR")/exo00/NOM.txt avec votre nom dedans"
         exit 0
@@ -166,4 +190,8 @@ if [ "$1" = "commit" ]; then
     cp JOURNAL.txt ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.journal.txt
     echo "$ALLTESTS/$NUMTESTS" > ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.mark.txt
     die
+fi
+
+if [ "$1" = "cleanup" ]; then
+    cleanupfinal
 fi
