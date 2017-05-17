@@ -24,23 +24,11 @@ normaltests () {
     runandcapture
     nostderr
     thistest Vérification du fichier NOM.txt
-    fileexists NOM.txt
+    fileexists ../NOM.txt
     stringequal "$(head -n 1 STDOUT.txt)" "Bonjour."
     thistest Vérification de la sortie
     stringequal "$(head -n 1 STDOUT.txt)" "Bonjour."
     filecheck 8bf282d28077db1c697afb13f25a7109 STDOUT.txt
-}
-
-finaltests () {
-    normaltests
-}
-
-cleanup () {
-    true
-}
-
-cleanupfinal () {
-    cleanup
 }
 
 finaltests () {

@@ -4,6 +4,15 @@ HDIR=$(pwd)
 stylebold=$(tput bold)
 stylenormal=$(tput sgr0)
 
+
+buildUpdate () {
+    (find .;echo ./reponse.sh;echo ./.FILES)|sort -u > .FILES
+}
+
+if [ ! -f ./.FILES ]; then
+    buildUpdate
+fi
+
 oui () {
     echo "    Oui! $ALLTESTS/$NUMTESTS" >> JOURNAL.txt    
 }
@@ -167,18 +176,18 @@ if [ "$1" = "commit" ]; then
     DATE=$(date -u +%s)
     cleanupfinal
     setupfinal
-    if [ ! -f ../exo00/NOM.txt ]; then
-        echo "Vous devez créer le fichier $(dirname "$HDIR")/exo00/NOM.txt avec votre nom dedans"
+    if [ ! -f ../NOM.txt ]; then
+        echo "Vous devez créer le fichier $(dirname "$HDIR")/NOM.txt avec votre nom dedans"
         exit 0
     fi
-    SIGN=$(md5sum < ../exo00/NOM.txt|cut -c1-32)
-    if [ -d ~jean-christophe.dubacq/selftests/ ]; then
-        DEST="~jean-christophe.dubacq/selftests"
+    SIGN=$(md5sum < ../NOM.txt|cut -c1-32)
+    if [ -w /home/usager/jean-christophe.dubacq/selftests ]; then
+        DEST="/home/usager/jean-christophe.dubacq/selftests"
     else
         DEST=/tmp/rendu
         mkdir -p $DEST
     fi
-    cp ../exo00/NOM.txt ${DEST}/$SIGN.NOM.txt
+    cp ../NOM.txt ${DEST}/$SIGN.NOM.txt
     if [ -f reponse.sh ]; then
         cp reponse.sh ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.reponse.sh
     else
@@ -193,5 +202,9 @@ if [ "$1" = "commit" ]; then
 fi
 
 if [ "$1" = "cleanup" ]; then
-    cleanupfinal
+    (find . ; cat .FILES; cat .FILES)|sort|uniq -u | xargs --no-run-if-empty rm -r --
+fi
+
+if [ "$1" = "update" ]; then
+    buildUpdate
 fi

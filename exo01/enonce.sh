@@ -5,12 +5,6 @@ intro () {
 
 }
 
-
-cleanupfinal () {
-    find . -type f -name '*.sh' -prune -o -type f -print0 | xargs -0 --no-run-if-empty rm
-    find . -mindepth 1 -type d -print0 | xargs -0 --no-run-if-empty rmdir
-}
-
 setup () {
     for i in orange.jpg prune.jpg marmotte.jpg notes12.txt notes24avril.txt note.txt notthingham.txt tmp41.xls TMP18.doc TPM.txt TMP.txt mire.gif; do
         echo "Contenu du fichier $i" > $i
@@ -73,10 +67,6 @@ finaltests () {
     filenotexists mire.gif
     SIGN=$(echo "Contenu du fichier mire.gif"|md5sum|cut -c1-32)
     filecheck $SIGN Images/MIRE.GIF
-}
-
-cleanup () {
-    true
 }
 
 . ../common/framework.sh
