@@ -6,8 +6,14 @@ stylenormal=$(tput sgr0)
 
 
 buildUpdate () {
-    (find .;echo ./reponse.sh;echo ./.FILES)|sort -u > .FILES
+    (find .;echo ./reponse.sh;echo ./.FILES;echo ./JOURNAL.txt)|sort -u > .FILES
 }
+
+cleanup () {
+    (find . -type f; cat .FILES; cat .FILES)|sort|uniq -u | xargs --no-run-if-empty rm --
+    (find . -type d; cat .FILES; cat .FILES)|sort|uniq -u | xargs --no-run-if-empty rm -r --
+}
+
 
 if [ ! -f ./.FILES ]; then
     buildUpdate
@@ -34,6 +40,7 @@ initialcheck () {
     else
         non
     fi
+    checkmode ./reponse.sh 1 7
 }
 
 runandcapture () {
@@ -100,6 +107,70 @@ filenotexists () {
     fi
 }
 
+checkmodes () {
+    for loop in 1 2 3; do
+        k=$(echo "$2"|cut -c${loop}-${loop})
+        checkmode $1 $loop $k
+    done
+}
+
+checkmode () {
+    SUBTEST=$((SUBTEST+1))
+    NUMTESTS=$((NUMTESTS+1))
+    echo "  Sous-test $MAINTEST.$SUBTEST" >> JOURNAL.txt
+    WHO="???"
+    if [ "$2" = "1" ]; then
+        WHO="le propriétaire"
+    fi
+    if [ "$2" = "2" ]; then
+        WHO="le groupe"
+    fi
+    if [ "$2" = "3" ]; then
+        WHO="les autres"
+    fi
+    WHAT="???"
+    case $3 in
+        0|1|2|3)
+            WHAT="-"
+            ;;
+        4|5|6|7)
+            WHAT="r"
+            ;;
+        *)
+            true
+            ;;
+    esac
+    case $3 in
+        0|1|4|5)
+            WHAT="${WHAT}-"
+            ;;
+        2|3|6|7)
+            WHAT="${WHAT}w"
+            ;;
+        *)
+            true
+            ;;
+    esac
+    case $3 in
+        0|2|4|6)
+            WHAT="${WHAT}-"
+            ;;
+        1|3|5|7)
+            WHAT="${WHAT}x"
+            ;;
+        *)
+            true
+            ;;
+    esac
+    echo "    Le mode du fichier <${1}> pour ${WHO} est ${WHAT} ?" >> JOURNAL.txt
+    if [ $(stat -c %a "$1" | cut -c${2}-${2}) = "$3" ]; then
+        ALLTESTS=$((ALLTESTS+1))
+        oui
+    else
+        non
+    fi
+}
+
 filecheck () {
     fileexists "$2"
     SUBTEST=$((SUBTEST+1))
@@ -154,7 +225,7 @@ if [ -z "$1" ]; then
     echo "--------------------------------------------"
     echo "${stylebold}Aucun test effectué.${stylenormal}"
     echo "--------------------------------------------"
-    cleanupfinal
+    cleanup
     setup
     exit 0
 fi
@@ -165,7 +236,7 @@ NUMTESTS=0
 
 if [ "$1" = "test" ]; then
     rm -f JOURNAL.txt
-    cleanupfinal
+    cleanup
     setup
     initialcheck
     normaltests
@@ -202,7 +273,7 @@ if [ "$1" = "commit" ]; then
 fi
 
 if [ "$1" = "cleanup" ]; then
-    (find . ; cat .FILES; cat .FILES)|sort|uniq -u | xargs --no-run-if-empty rm -r --
+    cleanup
 fi
 
 if [ "$1" = "update" ]; then
