@@ -53,6 +53,13 @@ runandcapture () {
         echo "J'execute reponse.sh $@" >> JOURNAL.txt
         sh "reponse.sh" "$@" > STDOUT.txt 2>STDERR.txt
     fi
+    lines=$(wc -l < STDOUT.txt)
+    if [ "$lines" -gt 0 ]; then
+        echo "Il y a eu une sortie générée" >> JOURNAL.txt
+        echo "<<<<<<<<<${stylebold}" >> JOURNAL.txt
+        cat STDOUT.txt >> JOURNAL.txt
+        echo "${stylenormal}>>>>>>>>>" >> JOURNAL.txt
+    fi
     lines=$(wc -l < STDERR.txt)
     if [ "$lines" -gt 0 ]; then
         echo "Il y a eu une sortie d'erreur générée" >> JOURNAL.txt
@@ -182,6 +189,7 @@ filecheck () {
         ALLTESTS=$((ALLTESTS+1))
         oui
     else
+        echo "    Le contenu mesuré est <$SUM>" >> JOURNAL.txt
         non
     fi
 }
@@ -203,9 +211,9 @@ nostderr () {
 
 
 die () {
-    cleanup
     rm -f STDOUT.txt STDERR.txt
     echo "---------- ${stylebold}$(basename "$(pwd)")${stylenormal} ---------------------------"
+    cleanup
     cat JOURNAL.txt
     echo "--------------------------------------------"
     echo "${stylebold}Total des tests : $ALLTESTS/$NUMTESTS.${stylenormal}"
@@ -245,7 +253,7 @@ fi
 
 if [ "$1" = "commit" ]; then
     DATE=$(date -u +%s)
-    cleanupfinal
+    cleanup
     setupfinal
     if [ ! -f ../NOM.txt ]; then
         echo "Vous devez créer le fichier $(dirname "$HDIR")/NOM.txt avec votre nom dedans"
@@ -270,6 +278,7 @@ if [ "$1" = "commit" ]; then
     cp JOURNAL.txt ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.journal.txt
     echo "$ALLTESTS/$NUMTESTS" > ${DEST}/$SIGN.$(basename "$(pwd)").$DATE.mark.txt
     die
+    cleanup
 fi
 
 if [ "$1" = "cleanup" ]; then
